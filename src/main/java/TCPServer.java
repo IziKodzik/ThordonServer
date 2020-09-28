@@ -61,6 +61,10 @@ public class TCPServer
 		System.out.println("Server stopped.");
 	}
 
+	public void addLayer(Layer layer){
+		this.layers.add(layer);
+	}
+
 	@Override
 	public void run() {
 		try {
@@ -80,6 +84,7 @@ public class TCPServer
 		private OutputStream output;
 		private byte[] request = new byte[0];
 		private byte[] response = new byte[0];
+		ExecutorService pool = Executors.newFixedThreadPool(2);
 
 		public Handle(Socket socket,List<Layer> layers) throws IOException{
 			this.socket = socket;
@@ -92,10 +97,15 @@ public class TCPServer
 		public String call() throws Exception {
 
 			byte[] data = new byte[10];
+
 			for(int size = this.input.read(data); size > 0; size = this.input.read(data)){
 				request = ByteBuffer.allocate(request.length+size)
 						.put(request).put(Arrays.copyOf(data,size)).array();
 			}
+			System.out.println("SSSIEMA");
+			boolean toForward = true;
+			for(int op = 0 ; op < layers.size() && toForward ; ++ op)
+				toForward = layers.get(op).process(request,response);
 
 			output.write(response);
 			System.out.println(new String(request));
