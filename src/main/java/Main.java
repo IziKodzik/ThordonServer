@@ -1,7 +1,10 @@
 
+import server.ConnectionKeeper;
+import server.DefaultLayer;
+import server.TCPServer;
+
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.nio.ByteBuffer;
@@ -11,10 +14,6 @@ public class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 
-		int[] y = {1,2,3};
-		System.out.println(Arrays.toString(y));
-		xd(y);
-		System.out.println(Arrays.toString(y));
 		try {
 			TCPServer server = new TCPServer(2137);
 			ConnectionKeeper keeper = new ConnectionKeeper();
@@ -50,7 +49,4 @@ public class Main {
 		}).start();
 	}
 
-	public  static void xd(int[] a){
-		a[2] = -23;
-	}
 }
