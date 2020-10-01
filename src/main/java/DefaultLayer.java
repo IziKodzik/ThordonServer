@@ -4,9 +4,10 @@ public class DefaultLayer
 	implements Layer{
 
 	@Override
-	public boolean process(byte[] request, byte[] response) {
-		String message = "Wisited default layer";
-		request = ByteBuffer.allocate(request.length + message.length() ).put(request).put(message.getBytes()).array();
+	public boolean process(ConnectionData connectionData) {
+		String mess = " default layer visited";
+		connectionData.response = ByteBuffer.allocate(connectionData.request.length + mess.length()).put(connectionData.request).put(mess.getBytes()).array();
+		System.out.println("visited default layer");
 		return true;
 	}
 }

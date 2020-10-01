@@ -1,5 +1,7 @@
 
 
+import jdk.internal.org.objectweb.asm.Handle;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -18,11 +20,11 @@ public class TCPServer
 	implements Runnable {
 
 
+	private ConnectionKeeper connectionKeeper;
 	private final ServerSocket serverSocket;
 	private volatile boolean isRunning;
-	private List<Layer> layers = new ArrayList<>();
-	ExecutorService threadPool = Executors.newFixedThreadPool(25);
-	Thread mainThread;
+	private ExecutorService threadPool = Executors.newFixedThreadPool(25);
+	private Thread mainThread;
 
 	public TCPServer(int port) throws IOException {
 		this.serverSocket = new ServerSocket(port);
@@ -30,18 +32,39 @@ public class TCPServer
 		this.mainThread = new Thread(this);
 	}
 
-	public synchronized  void open() throws IOException{
+	public void setConnectionKeeper(ConnectionKeeper connectionKeeper) {
+		this.connectionKeeper = connectionKeeper;
+	}
+
+	public ConnectionKeeper getConnectionKeeper() {
+		return connectionKeeper;
+	}
+
+	public ServerSocket getServerSocket() {
+		return serverSocket;
+	}
+
+
+	public boolean isRunning() {
+		return isRunning;
+	}
+
+	public void setRunning(boolean running) {
+		isRunning = running;
+	}
+
+
+	public synchronized void open() {
+
 			if(!isRunning){
 				System.out.println("Server can not be opened after closing.");
 				return;
 			}
-
 			System.out.println(String.format("Server started on port: %d.",serverSocket.getLocalPort()));
 			this.mainThread.start();
-
 	}
 
-	public void close() throws IOException{
+	public void close() throws IOException {
 		if(!isRunning)
 			return;
 		this.serverSocket.close();
@@ -51,19 +74,16 @@ public class TCPServer
 
 	public void serverLoop() throws IOException{
 
-
 		while (this.isRunning && !this.mainThread.isInterrupted()) {
 			System.out.println("Accepting requests.");
 			Socket socket = serverSocket.accept();
-			threadPool.submit(new Handle(socket,layers));
 			System.out.println(String.format("Received connection %s.",socket.toString()));
+			threadPool.submit(new ConnectionHandle(socket,connectionKeeper));
 		}
+		this.threadPool.shutdown();
 		System.out.println("Server stopped.");
 	}
 
-	public void addLayer(Layer layer){
-		this.layers.add(layer);
-	}
 
 	@Override
 	public void run() {
@@ -74,45 +94,23 @@ public class TCPServer
 		}
 	}
 
+	private static class ConnectionHandle
+		implements Callable<String>{
 
-	private static class Handle
-			implements Callable<String>{
+		private Socket clientSocket;
+		private ConnectionKeeper connectionKeeper;
+		ConnectionData connectionData = new ConnectionData();
 
-		private List<Layer> layers;
-		private Socket socket;
-		private InputStream input;
-		private OutputStream output;
-		private byte[] request = new byte[0];
-		private byte[] response = new byte[0];
-		ExecutorService pool = Executors.newFixedThreadPool(2);
-
-		public Handle(Socket socket,List<Layer> layers) throws IOException{
-			this.socket = socket;
-			this.input = socket.getInputStream();
-			this.output = socket.getOutputStream();
-			this.layers = layers;
+		public ConnectionHandle(Socket clientSocket, ConnectionKeeper connectionKeeper){
+			this.connectionKeeper = connectionKeeper;
+			this.clientSocket = clientSocket;
 		}
+
 
 		@Override
 		public String call() throws Exception {
-
-			byte[] data = new byte[10];
-
-			for(int size = this.input.read(data); size > 0; size = this.input.read(data)){
-				request = ByteBuffer.allocate(request.length+size)
-						.put(request).put(Arrays.copyOf(data,size)).array();
-			}
-			System.out.println("SSSIEMA");
-			boolean toForward = true;
-			for(int op = 0 ; op < layers.size() && toForward ; ++ op)
-				toForward = layers.get(op).process(request,response);
-
-			output.write(response);
-			System.out.println(new String(request));
-			return null;
+			return new String(connectionKeeper.connectionChain(clientSocket,connectionData));
 		}
-
-
 
 	}
 

@@ -11,10 +11,16 @@ public class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 
+		int[] y = {1,2,3};
+		System.out.println(Arrays.toString(y));
+		xd(y);
+		System.out.println(Arrays.toString(y));
 		try {
 			TCPServer server = new TCPServer(2137);
+			ConnectionKeeper keeper = new ConnectionKeeper();
+			keeper.addLayer(new DefaultLayer());
+			server.setConnectionKeeper(keeper);
 			server.open();
-			server.addLayer(new DefaultLayer());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -27,35 +33,24 @@ public class Main {
 				InputStream i = s.getInputStream();
 				OutputStream o = s.getOutputStream();
 
-				new Thread(()-> {
-					try {
-						o.write("XDDDD\n".getBytes());
-					o.write("JEBLO?".getBytes());
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}).start();
-				byte[] data = new byte[100];
-				new Thread(()-> {
-					try {
+				byte[] mes = "jebac disa kurwe zwisa".getBytes();
+				o.write(ByteBuffer.allocate(4).putInt(mes.length).array());
+				o.write(mes);
 
-						byte[] mes = new byte[0];
-						byte[] kox = new byte[20];
-						for(int b = i.read(kox); b > 0; b = i.read(kox)){
-							mes = ByteBuffer.allocate(mes.length + b).put(mes).put(Arrays.copyOf(kox,b)).array();
-						}
-						System.out.println(new String(mes));
+				byte[] data = new byte[4];
+				i.read(data);
+				data = new byte[ByteBuffer.wrap(data).asIntBuffer().get()];
+				i.read(data);
+				System.out.println(new String(data));
 
-
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-
-				}).start();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-		}).start();
 
+		}).start();
+	}
+
+	public  static void xd(int[] a){
+		a[2] = -23;
 	}
 }
