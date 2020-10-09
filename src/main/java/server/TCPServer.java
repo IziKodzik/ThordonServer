@@ -63,7 +63,7 @@ public class TCPServer
 		this.isRunning = false;
 	}
 
-	public void serverLoop() throws IOException{
+	private void serverLoop() throws IOException{
 
 		while (this.isRunning && !this.mainThread.isInterrupted()) {
 			System.out.println("Accepting requests.");

@@ -1,4 +1,6 @@
-package server;
+package server.layer;
+
+import server.ConnectionData;
 
 public interface Layer {
 

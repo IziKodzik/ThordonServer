@@ -1,52 +1,55 @@
 
-import server.ConnectionKeeper;
-import server.DefaultLayer;
-import server.TCPServer;
+import config.VariablesProvider;
+import server.*;
+import server.endpoint.impl.ThordonEndpoint;
+import server.layer.Layer;
+import server.layer.impl.SecurityLayer;
+import server.layer.impl.ServiceLayer;
+import server.receiver.Receiver;
+import server.endpoint.Endpoint;
+import server.receiver.impl.ThordonReceiver;
+import util.GuardedQueue;
+import util.ImageWorker;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.Socket;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 public class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 
+		//tests
+		VariablesProvider.setResourcesPath("src\\main\\resources\\");
 		try {
-			TCPServer server = new TCPServer(2137);
-			ConnectionKeeper keeper = new ConnectionKeeper();
-			keeper.addLayer(new DefaultLayer());
-			server.setConnectionKeeper(keeper);
-			server.open();
+			VariablesProvider.setDummyImage(ImageIO.read(new File(VariablesProvider.getResourcesPath() + "\\dummy.PNG")));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		Thread.sleep(2000);
-		new Thread(() -> {
+		try {
 
-			try {
-				Socket s = new Socket("localhost",2137);
-				InputStream i = s.getInputStream();
-				OutputStream o = s.getOutputStream();
+			TCPServer server = new TCPServer(2137);
 
-				byte[] mes = "jebac disa kurwe zwisa".getBytes();
-				o.write(ByteBuffer.allocate(4).putInt(mes.length).array());
-				o.write(mes);
 
-				byte[] data = new byte[4];
-				i.read(data);
-				data = new byte[ByteBuffer.wrap(data).asIntBuffer().get()];
-				i.read(data);
-				System.out.println(new String(data));
+			ConnectionKeeper connectionKeeper = new ConnectionKeeper(new ThordonReceiver(),
+					new ThordonEndpoint(),
+					new SecurityLayer(),
+					new ServiceLayer());
 
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			server.setConnectionKeeper(connectionKeeper);
+			server.open();
 
-		}).start();
+
+
+		} catch (IOException | AWTException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 }
