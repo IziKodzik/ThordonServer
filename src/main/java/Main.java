@@ -1,5 +1,6 @@
 
 import config.VariablesProvider;
+import model.DummyImage;
 import server.*;
 import server.endpoint.impl.ThordonEndpoint;
 import server.layer.Layer;
@@ -8,11 +9,13 @@ import server.layer.impl.ServiceLayer;
 import server.receiver.Receiver;
 import server.endpoint.Endpoint;
 import server.receiver.impl.ThordonReceiver;
+import service.RobotService;
 import util.GuardedQueue;
 import util.ImageWorker;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -24,9 +27,20 @@ public class Main {
 	public static void main(String[] args) throws InterruptedException {
 
 		//tests
+		try {
+			RobotService robotService = new RobotService();
+			robotService.moveDesktop((char)39);
+
+			System.exit(-69);
+
+
+		} catch (AWTException e) {
+			e.printStackTrace();
+		}
+		//test ends
 		VariablesProvider.setResourcesPath("src\\main\\resources\\");
 		try {
-			VariablesProvider.setDummyImage(ImageIO.read(new File(VariablesProvider.getResourcesPath() + "\\dummy.PNG")));
+			VariablesProvider.setDummyImage(new DummyImage(ImageIO.read(new File(VariablesProvider.getResourcesPath() + "\\dummy.PNG"))));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

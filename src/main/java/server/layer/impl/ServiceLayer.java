@@ -41,7 +41,7 @@ public class ServiceLayer
 				fromJson(new String(connectionData.getRequest()),
 						ClientActionRequest.class);
 		this.requestQueue.put(actionRequest);
-		BufferedImage dummy = VariablesProvider.getDummyImage();
+		BufferedImage dummy = VariablesProvider.getDummyImage().getImage();
 		try {
 
 			ClientActionRequest clientActionRequest = g.fromJson(new String(connectionData.getRequest()), ClientActionRequest.class);

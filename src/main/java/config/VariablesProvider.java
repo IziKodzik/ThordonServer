@@ -1,17 +1,18 @@
 package config;
 
-import java.awt.image.BufferedImage;
+import model.DummyImage;
+
 
 public class VariablesProvider {
 
 	private static String resourcesPath;
-	private static BufferedImage dummyImage;
+	private static DummyImage dummyImage;
 
-	public static BufferedImage getDummyImage() {
+	public static DummyImage getDummyImage() {
 		return dummyImage;
 	}
 
-	public static void setDummyImage(BufferedImage dummyImage) {
+	public static void setDummyImage(DummyImage dummyImage) {
 		VariablesProvider.dummyImage = dummyImage;
 	}
 

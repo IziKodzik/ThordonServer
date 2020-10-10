@@ -2,6 +2,7 @@ package service;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -99,6 +100,38 @@ public class RobotService
             this.keyRelease(letter);
         }
     }
+    public synchronized void openNewDesktop(){
+		this.keyPress(VK_CONTROL);
+    	this.keyPress(VK_WINDOWS);
+    	this.keyClick('D');
+    	this.keyRelease(VK_WINDOWS);
+    	this.keyRelease(VK_CONTROL);
+	}
+	public synchronized void closeCurrentDesktop() {
+		this.keyPress(VK_CONTROL);
+		this.keyPress(VK_WINDOWS);
+		this.keyClick((char)(VK_F4));
+		this.keyRelease(VK_WINDOWS);
+		this.keyRelease(VK_CONTROL);
+	}
+
+		public synchronized void moveDesktop(char key){
+		this.keyPress(VK_CONTROL);
+		this.keyPress(VK_WINDOWS);
+		this.keyClick(key);
+		this.keyRelease(VK_WINDOWS);
+		this.keyRelease(VK_CONTROL);
+    }
+
+    public synchronized void moveDesktopTimes(int times){
+
+    	for(;times >= 0; --times)
+			this.moveDesktop((char)37);
+
+
+    	for(;times <= 0;++times)
+    		this.moveDesktop((char)39);
+	}
 
     public synchronized void typeUpperCaseLetter(char letter) {
         this.keyPress(VK_SHIFT);
