@@ -1,11 +1,10 @@
 package service;
 
+import model.DTOs.Request.ClientActionRequest;
+
 import java.awt.*;
 import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static java.awt.event.KeyEvent.*;
 
@@ -77,7 +76,7 @@ public class RobotService
             if (toType.charAt(op) >= 'A' && toType.charAt(op) <= ('Z')) {
                 this.typeUpperCaseLetter(tmp.charAt(op));
             } else
-                this.keyClick(tmp.charAt(op));
+                this.letterClick(tmp.charAt(op));
         }
     }
 
@@ -89,7 +88,13 @@ public class RobotService
 
     }
 
-    public synchronized void keyClick(char letter) {
+    public synchronized void keyClick(char key){
+    	this.keyPress(key);
+    	this.keyRelease(key);
+	}
+
+
+    public synchronized void letterClick(char letter) {
 
         char verifiedLetter = getKeyCode(letter);
         if(verifiedLetter!=letter) {
@@ -103,39 +108,41 @@ public class RobotService
     public synchronized void openNewDesktop(){
 		this.keyPress(VK_CONTROL);
     	this.keyPress(VK_WINDOWS);
-    	this.keyClick('D');
+    	this.letterClick('D');
     	this.keyRelease(VK_WINDOWS);
     	this.keyRelease(VK_CONTROL);
 	}
 	public synchronized void closeCurrentDesktop() {
 		this.keyPress(VK_CONTROL);
 		this.keyPress(VK_WINDOWS);
-		this.keyClick((char)(VK_F4));
+		this.letterClick((char)(VK_F4));
 		this.keyRelease(VK_WINDOWS);
 		this.keyRelease(VK_CONTROL);
 	}
 
-		public synchronized void moveDesktop(char key){
+	public synchronized void moveDesktop(char direction){
 		this.keyPress(VK_CONTROL);
 		this.keyPress(VK_WINDOWS);
-		this.keyClick(key);
+		this.keyClick(direction);
 		this.keyRelease(VK_WINDOWS);
 		this.keyRelease(VK_CONTROL);
     }
+    public synchronized void moveDesktopTimes(char direction,int times){
+    	for(;times > 0;times--)
+    		moveDesktop(direction);
+	}
 
-    public synchronized void moveDesktopTimes(int times){
-
-    	for(;times >= 0; --times)
+    public synchronized void centerDesktop(int toCenter){
+    	for(;toCenter >= 0; --toCenter)
 			this.moveDesktop((char)37);
 
-
-    	for(;times <= 0;++times)
+    	for(;toCenter <= 0; ++toCenter)
     		this.moveDesktop((char)39);
 	}
 
     public synchronized void typeUpperCaseLetter(char letter) {
         this.keyPress(VK_SHIFT);
-        this.keyClick(letter);
+        this.letterClick(letter);
         this.keyRelease(VK_SHIFT);
     }
 
@@ -152,7 +159,7 @@ public class RobotService
     public synchronized void clickAltKey(char val) {
 
         this.keyPress(VK_ALT);
-        this.keyClick(getKeyCode(val));
+        this.letterClick(getKeyCode(val));
         this.keyRelease(VK_ALT);
 
     }
@@ -223,6 +230,9 @@ public class RobotService
         }
 
     }
+
+	public void serveActionRequest(ClientActionRequest actionRequest) {
+	}
 }
 
 

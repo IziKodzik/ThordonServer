@@ -42,48 +42,81 @@ public class ServiceLayer
 						ClientActionRequest.class);
 		this.requestQueue.put(actionRequest);
 		BufferedImage dummy = VariablesProvider.getDummyImage().getImage();
+		this.serveClient(actionRequest);
+//		try {
+//
+//			ClientActionRequest clientActionRequest = g.fromJson(new String(connectionData.getRequest()), ClientActionRequest.class);
+//			ClientSession currentSession = new ClientSession(clientActionRequest);
+//
+//
+//		if(sessions.contains(currentSession)){
+//			currentSession = sessions.get(sessions.indexOf(currentSession));
+//			System.out.println("Hello old client");
+//
+//		}else{
+//			if(sessions.size() != 0){
+//				System.out.println("Open new window");
+//			}
+//			int[] i = ImageWorker.findCoords(dummy);
+//			System.out.println(Arrays.toString(i) + "XDD");
+//			currentSession.setWindowCoords(i);
+//			this.sessions.add(currentSession);
+//
+//			System.out.println("Hello new client");
+//		}
+//		robot.mouseMove(clientActionRequest.getX() + currentSession.getWindowCoords()[0],
+//				clientActionRequest.getY() + currentSession.getWindowCoords()[1]);
+//		robot.leftClick();
+//		Thread.sleep(200);
+//
+//		BufferedImage image = robot.createScreenCapture();
+//		image = image.getSubimage(currentSession.getWindowCoords()[0],currentSession.getWindowCoords()[1],dummy.getWidth(),dummy.getHeight());
+//		ByteArrayOutputStream imagesBytes = new ByteArrayOutputStream();
+//		try {
+//			ImageIO.write(image,"png",imagesBytes);
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+//		connectionData.setResponse(imagesBytes.toByteArray());
+//		System.out.println(actionRequest);
+//		} catch (IOException | AWTException e) {
+//			e.printStackTrace();
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+		return true;
+	}
+
+	private void serveClient(ClientActionRequest actionRequest){
+
+		ClientSession currentSession = new ClientSession(actionRequest);
+
+		int sessionIndex = this.sessions.indexOf(currentSession);
+		if(sessionIndex != -1) {
+			currentSession = this.sessions.get(sessionIndex);
+			this.serveKnownClient(currentSession, actionRequest);
+		}else
+			this.serveNewClient(currentSession,actionRequest);
+
+	}
+
+	private void serveNewClient(ClientSession currentSession, ClientActionRequest actionRequest) {
+		currentSession.setDesktopIndex(this.sessions.size());
+		this.robot.openNewDesktop();
+		this.sessions.add(currentSession);
+		this.currentPosition = this.sessions.size()-1;
+
+		this.robot.mouseMove(10,100);
 		try {
-
-			ClientActionRequest clientActionRequest = g.fromJson(new String(connectionData.getRequest()), ClientActionRequest.class);
-			ClientSession currentSession = new ClientSession(clientActionRequest);
-
-
-		if(sessions.contains(currentSession)){
-			currentSession = sessions.get(sessions.indexOf(currentSession));
-			System.out.println("Hello old client");
-
-		}else{
-			if(sessions.size() != 0){
-				System.out.println("Open new window");
-			}
-			int[] i = ImageWorker.findCoords(dummy);
-			System.out.println(Arrays.toString(i) + "XDD");
-			currentSession.setWindowCoords(i);
-			this.sessions.add(currentSession);
-
-			System.out.println("Hello new client");
-		}
-		robot.mouseMove(clientActionRequest.getX() + currentSession.getWindowCoords()[0],
-				clientActionRequest.getY() + currentSession.getWindowCoords()[1]);
-		robot.leftClick();
-		Thread.sleep(200);
-
-		BufferedImage image = robot.createScreenCapture();
-		image = image.getSubimage(currentSession.getWindowCoords()[0],currentSession.getWindowCoords()[1],dummy.getWidth(),dummy.getHeight());
-		ByteArrayOutputStream imagesBytes = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(image,"png",imagesBytes);
+			Desktop.getDesktop().
+					open(new File("P:\\Help Input for 2017 Sizing Program\\Thordon Bearing Sizing Calculation Program.exe"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		connectionData.setResponse(imagesBytes.toByteArray());
-		System.out.println(actionRequest);
-		} catch (IOException | AWTException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		return true;
+	}
 
+	private void serveKnownClient(ClientSession currentSession, ClientActionRequest actionRequest) {
+		this.robot.centerDesktop(this.currentPosition + currentSession.getDesktopIndex());
+		System.out.println("Request dealing");
 	}
 }

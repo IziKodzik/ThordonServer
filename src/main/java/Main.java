@@ -21,22 +21,18 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 
 public class Main {
 
-	public static void main(String[] args) throws InterruptedException {
+	public static void main(String[] args) {
 
-		//tests
-		try {
-			RobotService robotService = new RobotService();
-			robotService.moveDesktop((char)39);
-
-			System.exit(-69);
-
-
-		} catch (AWTException e) {
-			e.printStackTrace();
-		}
+		//test
+//		try{
+//		}catch (Exception e){
+//			e.printStackTrace();
+//		}
+//		System.exit(69);
 		//test ends
 		VariablesProvider.setResourcesPath("src\\main\\resources\\");
 		try {
