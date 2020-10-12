@@ -1,7 +1,9 @@
 package util;
 
+import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
 public class ImageWorker {
@@ -39,6 +41,11 @@ public class ImageWorker {
 			}
 		}
 		return true;
+	}
+	public static byte[] parseImageToByteArray(BufferedImage image,String format) throws IOException {
+		ByteArrayOutputStream byteArray = new ByteArrayOutputStream();
+		ImageIO.write(image,format,byteArray);
+		return byteArray.toByteArray();
 	}
 
 

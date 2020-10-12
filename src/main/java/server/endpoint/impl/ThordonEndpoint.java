@@ -1,8 +1,11 @@
 package server.endpoint.impl;
 
+import config.VariablesProvider;
 import server.ConnectionData;
 import server.endpoint.Endpoint;
 
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;

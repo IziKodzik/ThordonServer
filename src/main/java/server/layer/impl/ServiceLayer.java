@@ -105,8 +105,6 @@ public class ServiceLayer
 		this.robot.openNewDesktop();
 		this.sessions.add(currentSession);
 		this.currentPosition = this.sessions.size()-1;
-
-		this.robot.mouseMove(10,100);
 		try {
 			Desktop.getDesktop().
 					open(new File("P:\\Help Input for 2017 Sizing Program\\Thordon Bearing Sizing Calculation Program.exe"));
