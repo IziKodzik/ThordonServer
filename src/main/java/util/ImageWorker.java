@@ -20,7 +20,7 @@ public class ImageWorker {
 		do {
 
 			image1 = screenCapture.getSubimage(x++,y,image.getWidth(),image.getHeight());
-			System.out.println(x + " <-x y-> " + y);
+//			System.out.println(x + " <-x y-> " + y);
 			if(x == screenSize.width - image.getWidth()) {
 				x = 0;
 				if(y<screenSize.height-image.getHeight())

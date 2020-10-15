@@ -16,7 +16,7 @@ public class ThordonEndpoint
 
 
 	@Override
-	public boolean send(OutputStream output, ConnectionData connectionData) {
+	public boolean callBack(OutputStream output, ConnectionData connectionData) {
 		try{
 
 			byte[] response = connectionData.getResponse();

@@ -6,7 +6,7 @@ import java.io.OutputStream;
 
 public interface Endpoint {
 
-	boolean send(OutputStream output, ConnectionData connectionData);
+	boolean callBack(OutputStream output, ConnectionData connectionData);
 
 }
 

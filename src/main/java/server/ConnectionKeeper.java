@@ -36,7 +36,7 @@ public class ConnectionKeeper {
 		for(int op = 0 ; op < layerChain.size() && proceed; ++ op)
 			proceed = layerChain.get(op).process(connectionData);
 
-		endpoint.send(socket.getOutputStream(),connectionData);
+		endpoint.callBack(socket.getOutputStream(),connectionData);
 		socket.close();
 		return connectionData.getResponse();
 	}

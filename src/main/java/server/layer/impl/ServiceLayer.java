@@ -35,14 +35,14 @@ public class ServiceLayer
 	}
 
 	@Override
-	public boolean process(ConnectionData connectionData) {
+	public synchronized boolean process(ConnectionData connectionData) {
 
 		ClientActionRequest actionRequest = g.
-				fromJson(new String(connectionData.getRequest()),
-						ClientActionRequest.class);
+					fromJson(new String(connectionData.getRequest()),
+							ClientActionRequest.class);
 		this.requestQueue.put(actionRequest);
-		BufferedImage dummy = VariablesProvider.getDummyImage().getImage();
-		this.serveClient(actionRequest);
+		connectionData.setResponse(this.serveClient(actionRequest));
+
 //		try {
 //
 //			ClientActionRequest clientActionRequest = g.fromJson(new String(connectionData.getRequest()), ClientActionRequest.class);
@@ -87,7 +87,7 @@ public class ServiceLayer
 		return true;
 	}
 
-	private void serveClient(ClientActionRequest actionRequest){
+	private byte[] serveClient(ClientActionRequest actionRequest){
 
 		ClientSession currentSession = new ClientSession(actionRequest);
 
@@ -98,10 +98,21 @@ public class ServiceLayer
 		}else
 			this.serveNewClient(currentSession,actionRequest);
 
+		int[] coords = currentSession.getWindowCoords();
+		BufferedImage image = VariablesProvider.getDummyImage().getImage();
+		image = robot.createScreenCapture(new Rectangle(coords[0],coords[1],image.getWidth(),image.getHeight()));
+		try {
+			return ImageWorker.parseImageToByteArray(image,"png");
+		} catch (IOException e) {
+			e.printStackTrace();
+			return new byte[0];
+		}
 	}
 
 	private void serveNewClient(ClientSession currentSession, ClientActionRequest actionRequest) {
 		currentSession.setDesktopIndex(this.sessions.size());
+		BufferedImage dummy = VariablesProvider.getDummyImage().getImage();
+
 		this.robot.openNewDesktop();
 		this.sessions.add(currentSession);
 		this.currentPosition = this.sessions.size()-1;
@@ -111,10 +122,39 @@ public class ServiceLayer
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+		try {
+			Thread.sleep(7000);
+			System.out.println("OUT");
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		try {
+
+			currentSession.setWindowCoords(ImageWorker.findCoords(dummy));
+		} catch (IOException | AWTException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void closeSession(int index){
 	}
 
 	private void serveKnownClient(ClientSession currentSession, ClientActionRequest actionRequest) {
 		this.robot.centerDesktop(this.currentPosition + currentSession.getDesktopIndex());
+		this.executeActionRequest(actionRequest);
 		System.out.println("Request dealing");
+	}
+	
+	private void executeActionRequest(ClientActionRequest actionRequest){
+		
+		String command = actionRequest.getCommand();
+		if(command.equals("click")){
+			this.robot.mouseMove(actionRequest.getX(),actionRequest.getY());
+			this.robot.leftClick();
+		}else if(command.contains("fill:")){
+			String fill = command.substring(command.indexOf("fill:")+"fill:".length());
+			System.out.println(fill);
+		}
+		
 	}
 }
