@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import config.VariablesProvider;
 import model.ClientSession;
 import model.DTOs.Request.ClientActionRequest;
+import model.SpecialSpot;
 import server.ConnectionData;
 import server.layer.Layer;
 import service.RobotService;
@@ -13,6 +14,7 @@ import util.ImageWorker;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.ByteBuffer;
@@ -28,6 +30,7 @@ public class ServiceLayer
 	RobotService robot = new RobotService();
 	int currentPosition = 0;
 	Gson g = new Gson();
+	volatile private ClientSession lastSession;
 
 	public ServiceLayer() throws AWTException {
 		this.requestQueue = new GuardedQueue<>();
@@ -101,6 +104,7 @@ public class ServiceLayer
 		int[] coords = currentSession.getWindowCoords();
 		BufferedImage image = VariablesProvider.getDummyImage().getImage();
 		image = robot.createScreenCapture(new Rectangle(coords[0],coords[1],image.getWidth(),image.getHeight()));
+		this.lastSession = currentSession;
 		try {
 			return ImageWorker.parseImageToByteArray(image,"png");
 		} catch (IOException e) {
@@ -113,6 +117,7 @@ public class ServiceLayer
 		currentSession.setDesktopIndex(this.sessions.size());
 		BufferedImage dummy = VariablesProvider.getDummyImage().getImage();
 
+		this.currentPosition = 1;
 		this.robot.openNewDesktop();
 		this.sessions.add(currentSession);
 		this.currentPosition = this.sessions.size()-1;
@@ -124,7 +129,12 @@ public class ServiceLayer
 		}
 		try {
 			Thread.sleep(7000);
+			this.robot.clickAltKey((char)(KeyEvent.VK_F4));
+			this.robot.mouseMove(0,0);
+			this.robot.leftClick();
 			System.out.println("OUT");
+			Thread.sleep(200);
+
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
@@ -140,21 +150,42 @@ public class ServiceLayer
 	}
 
 	private void serveKnownClient(ClientSession currentSession, ClientActionRequest actionRequest) {
-		this.robot.centerDesktop(this.currentPosition + currentSession.getDesktopIndex());
-		this.executeActionRequest(actionRequest);
+		this.robot.centerDesktop(currentSession.getDesktopIndex() - this.currentPosition );
+		this.executeActionRequest(currentSession,actionRequest);
 		System.out.println("Request dealing");
 	}
 	
-	private void executeActionRequest(ClientActionRequest actionRequest){
-		
+	private void executeActionRequest(ClientSession currentSession,ClientActionRequest actionRequest){
 		String command = actionRequest.getCommand();
 		if(command.equals("click")){
-			this.robot.mouseMove(actionRequest.getX(),actionRequest.getY());
+			java.util.List<SpecialSpot> specialSpots = VariablesProvider.getDummyImage().getSensitiveSpots();
+			boolean se = specialSpots.stream().
+					anyMatch(spot -> spot.getHitBox().contains(actionRequest.getX(),actionRequest.getY()));
+			System.out.println(se);
+			if(currentSession.isInterrupted()&&currentSession.getLastAction()!=null){
+				currentSession.setInterrupted(true);
+
+			}
+
+			if(!currentSession.equals(lastSession)){
+				lastSession.setInterrupted(true);
+			}
+			this.robot.mouseMove(actionRequest.getX() + currentSession.getWindowCoords()[0]
+					,actionRequest.getY() + currentSession.getWindowCoords()[1]);
 			this.robot.leftClick();
+			try {
+				Thread.sleep(200);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}else if(command.contains("fill:")){
+			this.robot.clearTextField(actionRequest.getX() + currentSession.getWindowCoords()[0]
+					,actionRequest.getY() + currentSession.getWindowCoords()[1]);
 			String fill = command.substring(command.indexOf("fill:")+"fill:".length());
+			this.robot.fillTextField(actionRequest.getX() + currentSession.getWindowCoords()[0]
+					,actionRequest.getY() + currentSession.getWindowCoords()[1],fill);
 			System.out.println(fill);
 		}
-		
+
 	}
 }

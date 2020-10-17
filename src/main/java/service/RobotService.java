@@ -4,6 +4,7 @@ import model.DTOs.Request.ClientActionRequest;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 
 import static java.awt.event.KeyEvent.*;
@@ -65,10 +66,10 @@ public class RobotService
 //        leftClick();
 //    }
 
-//    public synchronized void mouseMoveAndDoubleClick(String where) {
-//        mouseMove(where);
-//        doubleLeftClick();
-//    }
+    public synchronized void mouseMoveAndDoubleClick(int x,int y) {
+        mouseMove(x,y);
+        doubleLeftClick();
+    }
 
     public synchronized void type(String toType) {
         String tmp = toType.toUpperCase();
@@ -133,10 +134,11 @@ public class RobotService
 	}
 
     public synchronized void centerDesktop(int toCenter){
-    	for(;toCenter >= 0; --toCenter)
+		System.out.println();
+    	for(;toCenter > 0; --toCenter)
 			this.moveDesktop((char)37);
 
-    	for(;toCenter <= 0; ++toCenter)
+    	for(;toCenter < 0; ++toCenter)
     		this.moveDesktop((char)39);
 	}
 
@@ -146,15 +148,15 @@ public class RobotService
         this.keyRelease(VK_SHIFT);
     }
 
-//    public synchronized void clearTextField(String where) {
-//        this.mouseMoveAndDoubleClick(where);
-//        this.keyClick((char) VK_BACK_SPACE);
-//    }
+    public synchronized void clearTextField(int x,int y) {
+        this.mouseMoveAndDoubleClick(x,y);
+        this.keyClick((char) VK_BACK_SPACE);
+    }
 
-//    public synchronized void fillTextField(String where, String toType) {
-//        this.mouseMoveAndSelect(where);
-//        this.type(toType);
-//    }
+    public synchronized void fillTextField(int x,int y, String toType) {
+        this.mouseMoveAndDoubleClick(x,y);
+        this.type(toType);
+    }
 
     public synchronized void clickAltKey(char val) {
 

@@ -8,6 +8,7 @@ public class ClientSession{
 	private ClientActionRequest lastAction;
 	private int[] windowCoords;
 	private int desktopIndex;
+	private boolean isInterrupted;
 
 
 	public ClientSession(ClientActionRequest actionRequest) {
@@ -25,6 +26,19 @@ public class ClientSession{
 		this.userId = userId;
 		this.windowCoords = windowCoords;
 		this.desktopIndex = desktopIndex;
+	}
+
+	public ClientSession() {
+
+	}
+
+
+	public boolean isInterrupted() {
+		return isInterrupted;
+	}
+
+	public void setInterrupted(boolean interrupted) {
+		isInterrupted = interrupted;
 	}
 
 	public int[] getWindowCoords() {

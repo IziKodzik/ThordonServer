@@ -1,15 +1,18 @@
 package model;
 
+import org.w3c.dom.css.Rect;
+
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
 import java.awt.image.IndexColorModel;
 import java.awt.image.WritableRaster;
 import java.util.*;
+import java.util.List;
 
 public class DummyImage {
 
-	private Map<String,SpecialSpot> specialSpots = new LinkedHashMap<>();
+	private final Map<String, List<SpecialSpot>> specialSpots = new LinkedHashMap<>();
 //	private Map<String,Ac>
 
 
@@ -17,18 +20,26 @@ public class DummyImage {
 
 	public DummyImage(BufferedImage image) {
 		this.image = image;
+		specialSpots.put("sensitive",new ArrayList<>());
 	}
 
 	public void addSpot(SpecialSpot spot){
-		this.specialSpots.putIfAbsent(spot.getName(),spot);
+
+		specialSpots.get(spot.getName()).add(spot);
 	}
-	public SpecialSpot getSpot(String spotName){
-		return this.specialSpots.get(spotName);
+	public void addSensitiveSpot(Rectangle rectangle){
+		this.addSpot(new SpecialSpot("sensitive",rectangle));
 	}
-	
+
+	public List<SpecialSpot> getSensitiveSpots(){
+		return specialSpots.get("sensitive");
+	}
+
 	public BufferedImage getImage() {
 		return image;
 	}
+
+
 
 	public void setImage(BufferedImage image) {
 		this.image = image;

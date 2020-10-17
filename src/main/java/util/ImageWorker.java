@@ -4,6 +4,7 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 
 public class ImageWorker {
@@ -16,11 +17,12 @@ public class ImageWorker {
 		int y= 0;
 		BufferedImage screenCapture =
 				robot.createScreenCapture(new Rectangle(0, 0, screenSize.width, screenSize.height));
+		ImageIO.write(screenCapture,"png",new File("XD.png"));
 		BufferedImage image1;
 		do {
 
 			image1 = screenCapture.getSubimage(x++,y,image.getWidth(),image.getHeight());
-//			System.out.println(x + " <-x y-> " + y);
+			System.out.println(x + " <-x y-> " + y);
 			if(x == screenSize.width - image.getWidth()) {
 				x = 0;
 				if(y<screenSize.height-image.getHeight())
