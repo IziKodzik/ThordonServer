@@ -3,40 +3,45 @@ package server;
 import server.layer.Layer;
 import server.receiver.Receiver;
 import server.endpoint.Endpoint;
+import server.requestDirector.RequestDirector;
 
 import java.io.IOException;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 public class ConnectionKeeper {
 
 	private Receiver receiver;
-	private List<Layer> layerChain = new ArrayList<>();
-	private Endpoint endpoint;
+	private RequestDirector requestDirector;
+	private List<Layer<Boolean>> layerChain = new ArrayList<>();
 
 
-	public ConnectionKeeper(Receiver receiver, Endpoint endpoint, ArrayList<Layer> layerChain) {
+	public ConnectionKeeper(Receiver receiver,
+							RequestDirector requestDirector,List<Layer<Boolean>> layerChain) {
 		this.receiver = receiver;
-		this.endpoint = endpoint;
+		this.requestDirector = requestDirector;
 		this.layerChain = layerChain;
 	}
-	public ConnectionKeeper(Receiver receiver, Endpoint endpoint, Layer... layers){
-		this.receiver = receiver;
-		this.endpoint = endpoint;
-		this.layerChain = Arrays.asList(layers);
+
+	public ConnectionKeeper(Receiver receiver,RequestDirector director,
+							Layer<Boolean>... layers){
+		this(receiver,director, Arrays.asList(layers));
 	}
+
 
 	public byte[] connectionChain(Socket socket,ConnectionData connectionData) throws IOException {
 
 		connectionData.setSocket(socket);
+
 		connectionData.setRequest( receiver.receive(socket.getInputStream()));
 		boolean proceed = true;
 		for(int op = 0 ; op < layerChain.size() && proceed; ++ op)
 			proceed = layerChain.get(op).process(connectionData);
 
-		endpoint.callBack(socket.getOutputStream(),connectionData);
+
+		System.out.println(requestDirector.redirect(connectionData));
+
+		requestDirector.redirect(connectionData).callBack(socket.getOutputStream(),connectionData);
 		socket.close();
 		return connectionData.getResponse();
 	}
@@ -49,22 +54,16 @@ public class ConnectionKeeper {
 		this.receiver = receiver;
 	}
 
-	public List<Layer> getLayerChain() {
+	public List<Layer<Boolean>> getLayerChain() {
 		return layerChain;
 	}
 
-	public void setLayerChain(ArrayList<Layer> layerChain) {
+	public void setLayerChain(ArrayList<Layer<Boolean>> layerChain) {
 		this.layerChain = layerChain;
 	}
-	public void addLayer(Layer layer){
+	public void addLayer(Layer<Boolean> layer){
 		this.layerChain.add(layer);
 	}
 
-	public Endpoint getEndpoint() {
-		return endpoint;
-	}
 
-	public void setEndpoint(Endpoint endpoint) {
-		this.endpoint = endpoint;
-	}
 }

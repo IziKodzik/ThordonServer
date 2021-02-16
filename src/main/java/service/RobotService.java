@@ -54,17 +54,6 @@ public class RobotService
         leftClick();
     }
 
-//    public synchronized void mouseMove(String where) {
-//
-//        FloatPoint point = destinations.get(where);
-//        this.mouseMove((int) (point.getX() * x), (int) (point.getY() * y));
-//
-//    }
-
-//    public synchronized void mouseMoveAndSelect(String where) {
-//        mouseMove(where);
-//        leftClick();
-//    }
 
     public synchronized void mouseMoveAndDoubleClick(int x,int y) {
         mouseMove(x,y);

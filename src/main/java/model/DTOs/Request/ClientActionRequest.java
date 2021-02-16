@@ -6,16 +6,26 @@ public class ClientActionRequest {
     private int x;
     private int y;
     private int userId;
+	private String direction;
 
 
-    public ClientActionRequest(String command, int x, int y, int userId) {
+    public ClientActionRequest(String command, int x, int y, int userId,String direction) {
         this.command = command;
         this.x = x;
         this.y = y;
         this.userId = userId;
+        this.direction = direction;
     }
 
-    public String getCommand() {
+	public String getDirection() {
+		return direction;
+	}
+
+	public void setDirection(String direction) {
+		this.direction = direction;
+	}
+
+	public String getCommand() {
         return command;
     }
 
@@ -54,6 +64,7 @@ public class ClientActionRequest {
 				", x=" + x +
 				", y=" + y +
 				", userId=" + userId +
+				", direction=" + direction+
 				'}';
 	}
 }

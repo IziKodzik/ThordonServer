@@ -22,7 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ServiceLayer
-	implements Layer {
+	implements Layer<Boolean>{
 
 	String resourcesPath = "src/resources";
 	GuardedQueue<ClientActionRequest> requestQueue;
@@ -38,7 +38,8 @@ public class ServiceLayer
 	}
 
 	@Override
-	public synchronized boolean process(ConnectionData connectionData) {
+	public synchronized Boolean process(ConnectionData connectionData) {
+
 
 		ClientActionRequest actionRequest = g.
 					fromJson(new String(connectionData.getRequest()),
@@ -46,53 +47,16 @@ public class ServiceLayer
 		this.requestQueue.put(actionRequest);
 		connectionData.setResponse(this.serveClient(actionRequest));
 
-//		try {
-//
-//			ClientActionRequest clientActionRequest = g.fromJson(new String(connectionData.getRequest()), ClientActionRequest.class);
-//			ClientSession currentSession = new ClientSession(clientActionRequest);
-//
-//
-//		if(sessions.contains(currentSession)){
-//			currentSession = sessions.get(sessions.indexOf(currentSession));
-//			System.out.println("Hello old client");
-//
-//		}else{
-//			if(sessions.size() != 0){
-//				System.out.println("Open new window");
-//			}
-//			int[] i = ImageWorker.findCoords(dummy);
-//			System.out.println(Arrays.toString(i) + "XDD");
-//			currentSession.setWindowCoords(i);
-//			this.sessions.add(currentSession);
-//
-//			System.out.println("Hello new client");
-//		}
-//		robot.mouseMove(clientActionRequest.getX() + currentSession.getWindowCoords()[0],
-//				clientActionRequest.getY() + currentSession.getWindowCoords()[1]);
-//		robot.leftClick();
-//		Thread.sleep(200);
-//
-//		BufferedImage image = robot.createScreenCapture();
-//		image = image.getSubimage(currentSession.getWindowCoords()[0],currentSession.getWindowCoords()[1],dummy.getWidth(),dummy.getHeight());
-//		ByteArrayOutputStream imagesBytes = new ByteArrayOutputStream();
-//		try {
-//			ImageIO.write(image,"png",imagesBytes);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		connectionData.setResponse(imagesBytes.toByteArray());
-//		System.out.println(actionRequest);
-//		} catch (IOException | AWTException e) {
-//			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
+
 		return true;
 	}
 
 	private byte[] serveClient(ClientActionRequest actionRequest){
 
 		ClientSession currentSession = new ClientSession(actionRequest);
+		System.out.println(actionRequest);
+		if(this.lastSession!=null &&!this.lastSession.equals(currentSession) )
+			lastSession.setInterrupted(true);
 
 		int sessionIndex = this.sessions.indexOf(currentSession);
 		if(sessionIndex != -1) {
@@ -105,6 +69,13 @@ public class ServiceLayer
 		BufferedImage image = VariablesProvider.getDummyImage().getImage();
 		image = robot.createScreenCapture(new Rectangle(coords[0],coords[1],image.getWidth(),image.getHeight()));
 		this.lastSession = currentSession;
+		java.util.List<SpecialSpot> specialSpots = VariablesProvider.getDummyImage().getSensitiveSpots();
+		boolean se = specialSpots.stream().
+				anyMatch(spot -> spot.getHitBox().contains(actionRequest.getX(),actionRequest.getY()));
+		if(se)
+			currentSession.setLastAction(actionRequest);
+
+		currentSession.setLastAction(actionRequest);
 		try {
 			return ImageWorker.parseImageToByteArray(image,"png");
 		} catch (IOException e) {
@@ -128,7 +99,7 @@ public class ServiceLayer
 			e.printStackTrace();
 		}
 		try {
-			Thread.sleep(7000);
+			Thread.sleep(5000);
 			this.robot.clickAltKey((char)(KeyEvent.VK_F4));
 			this.robot.mouseMove(0,0);
 			this.robot.leftClick();
@@ -146,27 +117,26 @@ public class ServiceLayer
 		}
 	}
 
-	private void closeSession(int index){
+	private void closeSession(ClientSession clientSession){
+
+		this.sessions.remove(clientSession);
+		this.currentPosition--;
 	}
 
 	private void serveKnownClient(ClientSession currentSession, ClientActionRequest actionRequest) {
-		this.robot.centerDesktop(currentSession.getDesktopIndex() - this.currentPosition );
+		if(currentSession.isInterrupted() && currentSession.getLastAction()!=null) {
+			this.executeActionRequest(currentSession, actionRequest);
+			currentSession.setInterrupted(false);
+		}
+
 		this.executeActionRequest(currentSession,actionRequest);
-		System.out.println("Request dealing");
 	}
 	
 	private void executeActionRequest(ClientSession currentSession,ClientActionRequest actionRequest){
 		String command = actionRequest.getCommand();
+		this.robot.centerDesktop(currentSession.getDesktopIndex() - this.currentPosition );
+		System.out.println(command);
 		if(command.equals("click")){
-			java.util.List<SpecialSpot> specialSpots = VariablesProvider.getDummyImage().getSensitiveSpots();
-			boolean se = specialSpots.stream().
-					anyMatch(spot -> spot.getHitBox().contains(actionRequest.getX(),actionRequest.getY()));
-			System.out.println(se);
-			if(currentSession.isInterrupted()&&currentSession.getLastAction()!=null){
-				currentSession.setInterrupted(true);
-
-			}
-
 			if(!currentSession.equals(lastSession)){
 				lastSession.setInterrupted(true);
 			}
@@ -182,8 +152,18 @@ public class ServiceLayer
 			this.robot.clearTextField(actionRequest.getX() + currentSession.getWindowCoords()[0]
 					,actionRequest.getY() + currentSession.getWindowCoords()[1]);
 			String fill = command.substring(command.indexOf("fill:")+"fill:".length());
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			this.robot.fillTextField(actionRequest.getX() + currentSession.getWindowCoords()[0]
 					,actionRequest.getY() + currentSession.getWindowCoords()[1],fill);
+			try {
+				Thread.sleep(20);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 			System.out.println(fill);
 		}
 

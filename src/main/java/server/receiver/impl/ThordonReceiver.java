@@ -5,12 +5,14 @@ import server.receiver.Receiver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 public class ThordonReceiver
 	implements Receiver {
 
 	@Override
 	public byte[] receive(InputStream input) {
+
 		byte[] request = new byte[4];
 		try {
 			input.read(request);

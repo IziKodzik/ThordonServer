@@ -2,8 +2,8 @@ package server.layer;
 
 import server.ConnectionData;
 
-public interface Layer {
+public interface Layer <T> {
 
-	boolean process(ConnectionData connectionData);
+	T process(ConnectionData connectionData);
 
 }

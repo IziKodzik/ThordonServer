@@ -1,30 +1,33 @@
 package server.endpoint.impl;
 
-import config.VariablesProvider;
 import server.ConnectionData;
 import server.endpoint.Endpoint;
 
-import javax.imageio.ImageIO;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
+import java.util.Base64;
 
-public class ThordonEndpoint
+public class IOSEndpoint
 	implements Endpoint {
 
 
 	@Override
 	public String getName() {
-		return "web";
+		return "iOS";
 	}
 
 	@Override
 	public boolean callBack(OutputStream output, ConnectionData connectionData) {
+
+
+
 		try{
 
-			byte[] response = connectionData.getResponse();
+			System.out.println("ios endpoint");
+			byte[] response =(Base64.getEncoder().encode(connectionData.getResponse()));
+			System.out.println(Arrays.toString(ByteBuffer.allocate(4).putInt(response.length).array()));
 			output.write(ByteBuffer.allocate(4).putInt(response.length).array());
 			output.write(response);
 			return true;
@@ -35,3 +38,4 @@ public class ThordonEndpoint
 		}
 	}
 }
+

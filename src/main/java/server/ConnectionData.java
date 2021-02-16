@@ -22,6 +22,7 @@ public class ConnectionData{
 	}
 
 	public void setRequest(byte[] request) {
+		System.out.println(new String(request));
 		this.request = request;
 	}
 

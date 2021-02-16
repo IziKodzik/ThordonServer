@@ -1,31 +1,28 @@
 
 import config.VariablesProvider;
-import model.ClientSession;
+
 import model.DummyImage;
-import model.SpecialSpot;
+
 import server.*;
+import server.endpoint.impl.IOSEndpoint;
 import server.endpoint.impl.ThordonEndpoint;
-import server.layer.Layer;
+
 import server.layer.impl.SecurityLayer;
 import server.layer.impl.ServiceLayer;
-import server.receiver.Receiver;
-import server.endpoint.Endpoint;
+
+
 import server.receiver.impl.ThordonReceiver;
-import service.RobotService;
-import util.GuardedQueue;
-import util.ImageWorker;
+
+import server.requestDirector.impl.ThordonDirector;
+
 
 import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.event.KeyEvent;
+
 import java.io.File;
-import java.io.FileWriter;
+
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.Map;
+
 
 public class Main {
 
@@ -40,7 +37,6 @@ public class Main {
 //		}catch (Exception e){
 //			e.printStackTrace();
 //		}
-		System.exit(69);
 		//test ends
 		VariablesProvider.setResourcesPath("src\\main\\resources\\");
 		try {
@@ -63,11 +59,10 @@ public class Main {
 			TCPServer server = new TCPServer(2137);
 
 
-			ConnectionKeeper connectionKeeper = new ConnectionKeeper(new ThordonReceiver(),
-					new ThordonEndpoint(),
-					new SecurityLayer(),
-					new ServiceLayer());
 
+			ConnectionKeeper connectionKeeper = new ConnectionKeeper(
+					new ThordonReceiver(),new ThordonDirector(new IOSEndpoint(),new ThordonEndpoint()),new SecurityLayer(),new ServiceLayer()
+			);
 			server.setConnectionKeeper(connectionKeeper);
 			server.open();
 
@@ -78,5 +73,6 @@ public class Main {
 		}
 
 	}
+
 
 }

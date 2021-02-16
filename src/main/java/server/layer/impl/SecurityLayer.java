@@ -4,13 +4,16 @@ import server.ConnectionData;
 import server.layer.Layer;
 
 public class SecurityLayer
-	implements Layer {
+	implements Layer<Boolean> {
 
 	@Override
-	public boolean process(ConnectionData connectionData) {
-		if(connectionData.getSocket().getInetAddress().isLoopbackAddress()) {
+	public Boolean process(ConnectionData connectionData) {
+		if(connectionData.getSocket().getInetAddress().isLoopbackAddress())
 			return true;
-		}
-		return false;	}
+
+		//check password and login then true
+		return true;
+
+	}
 
 }
