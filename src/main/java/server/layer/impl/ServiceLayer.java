@@ -94,7 +94,7 @@ public class ServiceLayer
 		this.currentPosition = this.sessions.size()-1;
 		try {
 			Desktop.getDesktop().
-					open(new File("P:\\Help Input for 2017 Sizing Program\\Thordon Bearing Sizing Calculation Program.exe"));
+					open(new File("C:\\Program Files (x86)\\Thordon Bearings Inc\\Thordon Bearing Sizing Calculation Program\\Thordon Bearing Sizing Calculation Program.exe"));
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
