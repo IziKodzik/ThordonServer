@@ -87,7 +87,7 @@ public class ServiceLayer
 	private void serveNewClient(ClientSession currentSession, ClientActionRequest actionRequest) {
 		currentSession.setDesktopIndex(this.sessions.size());
 		BufferedImage dummy = VariablesProvider.getDummyImage().getImage();
-
+		System.out.println(actionRequest.toString() + " yttty");
 		this.currentPosition = 1;
 		this.robot.openNewDesktop();
 		this.sessions.add(currentSession);
@@ -135,36 +135,42 @@ public class ServiceLayer
 	private void executeActionRequest(ClientSession currentSession,ClientActionRequest actionRequest){
 		String command = actionRequest.getCommand();
 		this.robot.centerDesktop(currentSession.getDesktopIndex() - this.currentPosition );
-		System.out.println(command);
-		if(command.equals("click")){
-			if(!currentSession.equals(lastSession)){
-				lastSession.setInterrupted(true);
-			}
-			this.robot.mouseMove(actionRequest.getX() + currentSession.getWindowCoords()[0]
-					,actionRequest.getY() + currentSession.getWindowCoords()[1]);
-			this.robot.leftClick();
-			try {
+		System.out.println(actionRequest + " <---");
+		try {
+			if (command.equals("click")) {
+				if (!currentSession.equals(lastSession)) {
+					lastSession.setInterrupted(true);
+				}
+				this.robot.mouseMove(actionRequest.getX() + currentSession.getWindowCoords()[0]
+						, actionRequest.getY() + currentSession.getWindowCoords()[1]);
+				this.robot.leftClick();
+
 				Thread.sleep(200);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}else if(command.contains("fill:")){
-			this.robot.clearTextField(actionRequest.getX() + currentSession.getWindowCoords()[0]
-					,actionRequest.getY() + currentSession.getWindowCoords()[1]);
-			String fill = command.substring(command.indexOf("fill:")+"fill:".length());
-			try {
+
+			} else if (command.contains("fill:")) {
+				this.robot.clearTextField(actionRequest.getX() + currentSession.getWindowCoords()[0]
+						, actionRequest.getY() + currentSession.getWindowCoords()[1]);
+				String fill = command.substring(command.indexOf("fill:") + "fill:".length());
 				Thread.sleep(20);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			this.robot.fillTextField(actionRequest.getX() + currentSession.getWindowCoords()[0]
-					,actionRequest.getY() + currentSession.getWindowCoords()[1],fill);
-			try {
+
+				this.robot.fillTextField(actionRequest.getX() + currentSession.getWindowCoords()[0]
+						, actionRequest.getY() + currentSession.getWindowCoords()[1], fill);
 				Thread.sleep(20);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+
+			} else if (command.contains("general-info:")) {
+				this.robot.mouseMoveAndDoubleClick(122 + currentSession.getWindowCoords()[0],
+						33 + currentSession.getWindowCoords()[1]);
+				String[] split = command.substring("general-info:".length()).split("\\(\\. Y \\.\\)");
+				if(split.length != 8)
+					return;
+				for(int op = 0; op < 8; ++op){
+					robot.type(split[op]);
+					robot.keyClick((char) KeyEvent.VK_TAB);
+				}
+				Thread.sleep(400);
 			}
-			System.out.println(fill);
+		}catch (InterruptedException e){
+			e.printStackTrace();
 		}
 
 	}

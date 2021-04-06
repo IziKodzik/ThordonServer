@@ -20,6 +20,9 @@ public class ThordonReceiver
 			input.read(request);
 		} catch (IOException e) {
 			e.printStackTrace();
+		}finally{
+			System.out.println("XDD");
+
 		}
 		return request;
 	}

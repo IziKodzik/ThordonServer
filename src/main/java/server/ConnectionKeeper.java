@@ -32,8 +32,9 @@ public class ConnectionKeeper {
 	public byte[] connectionChain(Socket socket,ConnectionData connectionData) throws IOException {
 
 		connectionData.setSocket(socket);
-
-		connectionData.setRequest( receiver.receive(socket.getInputStream()));
+		byte[] rawMessage =  receiver.receive(socket.getInputStream());
+		System.out.println(new String(rawMessage));
+		connectionData.setRequest(rawMessage);
 		boolean proceed = true;
 		for(int op = 0 ; op < layerChain.size() && proceed; ++ op)
 			proceed = layerChain.get(op).process(connectionData);

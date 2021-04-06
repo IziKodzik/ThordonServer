@@ -20,7 +20,6 @@ public class ImageWorker {
 		ImageIO.write(screenCapture,"png",new File("XD.png"));
 		BufferedImage image1;
 		do {
-
 			image1 = screenCapture.getSubimage(x++,y,image.getWidth(),image.getHeight());
 //			System.out.println(x + " <-x y-> " + y);
 			if(x == screenSize.width - image.getWidth()) {
@@ -29,6 +28,7 @@ public class ImageWorker {
 					y++;
 			}
 		}while (!compareImages(image,image1));
+		System.out.println("Coords found");
 		System.out.println(compareImages(image, image1));
 		return new int[]{x-1,y-1};
 	}
